@@ -47,6 +47,8 @@ namespace GoogleARCore.HelloAR
 
         public GameObject m_linesPrefab;
 
+        public GameObject m_targetPrefab;
+
         /// <summary>
         /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
         /// </summary>
@@ -140,34 +142,52 @@ namespace GoogleARCore.HelloAR
                 // world evolves.
                 var anchor = Session.CreateAnchor(hit.Point, Quaternion.identity);
 
-                // Intanstiate an Andy Android object as a child of the anchor; it's transform will now benefit
-                // from the anchor's tracking.
-                var newPoint = Instantiate(m_pointPrefab, hit.Point, Quaternion.identity,
-                    anchor.transform);
-
-                // Andy should look at the camera but still be flush with the plane.
-                newPoint.transform.LookAt(m_firstPersonCamera.transform);
-                newPoint.transform.rotation = Quaternion.Euler(0.0f,
-                    newPoint.transform.rotation.eulerAngles.y, newPoint.transform.rotation.z);
-
-                // Use a plane attachment component to maintain Andy's y-offset from the plane
-                // (occurs after anchor updates).
-                newPoint.GetComponent<PlaneAttachment>().Attach(hit.Plane);
-
-                if (lines == null)
+                if(Input.touchCount == 1)
                 {
-                    var anchor2 = Session.CreateAnchor(hit.Point, Quaternion.identity);
-                    lines = Instantiate(m_linesPrefab, hit.Point, Quaternion.identity, anchor2.transform);
-                   lines.GetComponent<PlaneAttachment>().Attach(hit.Plane);
-                   Debug.Log("Creating lines");
+                    AddLandmark(m_pointPrefab, hit, anchor);
                 }
 
-                var lineRenderer = lines.GetComponent<LineRenderer>();
-                lineRenderer.positionCount = numberOfPoints + 1;
-                lineRenderer.SetPosition(numberOfPoints, new Vector3(newPoint.transform.position.x, newPoint.transform.position.y, newPoint.transform.position.z));
-                numberOfPoints++;
-                Debug.Log("Drawing new line point");
+                if (Input.touchCount == 2)
+                {
+                    AddLandmark(m_targetPrefab, hit, anchor);
+                }
             }
+        }
+
+    
+        private void AddLandmark(GameObject landMarkPrefab, TrackableHit hit, Anchor anchor)
+        {
+            // Intanstiate a landmark as a child of the anchor; it's transform will now benefit
+            // from the anchor's tracking.
+            var newPoint = Instantiate(landMarkPrefab, hit.Point, Quaternion.identity,
+                anchor.transform);
+
+            // the landmark should look at the camera but still be flush with the plane.
+            newPoint.transform.LookAt(m_firstPersonCamera.transform);
+            newPoint.transform.rotation = Quaternion.Euler(0.0f,
+                newPoint.transform.rotation.eulerAngles.y, newPoint.transform.rotation.z);
+
+            newPoint.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+            AddLine(newPoint.transform, hit, anchor);
+        }
+
+      
+
+        private void AddLine(Transform transform, TrackableHit hit, Anchor anchor)
+        {
+            if (lines == null)
+            {
+
+                lines = Instantiate(m_linesPrefab, hit.Point, Quaternion.identity, anchor.transform);
+                lines.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+                Debug.Log("Creating lines");
+            }
+
+            var lineRenderer = lines.GetComponent<LineRenderer>();
+            lineRenderer.positionCount = numberOfPoints + 1;
+            lineRenderer.SetPosition(numberOfPoints, new Vector3(transform.position.x, transform.position.y, transform.position.z));
+            numberOfPoints++;
+            Debug.Log("Drawing new line point");
         }
 
         /// <summary>
