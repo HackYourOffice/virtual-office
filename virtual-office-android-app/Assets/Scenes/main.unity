@@ -259,7 +259,7 @@ MonoBehaviour:
     type: 2}
   m_linesPrefab: {fileID: 1504141337818854, guid: e7b41588da9b45c47a07d41bf9e4cdf2,
     type: 2}
-  m_targetPrefab: {fileID: 1667820574716516, guid: 50884edb99e42a240bbd38212eacfcb0,
+  m_targetPrefab: {fileID: 1851208192351750, guid: 9e8a572e2ca69ea4f8e70876e1d51034,
     type: 2}
   m_searchingForPlaneUI: {fileID: 1133631540}
 --- !u!20 &989943870 stripped
