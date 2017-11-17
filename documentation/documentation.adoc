@@ -1,0 +1,18 @@
+# Virtual Office
+
+## Leitsystem
+* Wo finde ich:
+** Meetingräume (auch für Externe/Kunden)
+*** Kunde kommt am Morgen in das synyx Büro zu einem Meeting, kennt sich jedoch
+bei synyx noch nicht so gut aus. Wir wollen ihn direkt an der Tür abholen und ihn virtuell in den Meetingräum führen.
+** Kaffemaschine
+*** Auch auf dem Weg zur Kaffeemaschine wollen wir ihn unterstützen.
+** Toiletten
+** Notausgänge
+** ...
+
+## Technik
+* Unity
+** ARToolKit
+** ARcore
+
