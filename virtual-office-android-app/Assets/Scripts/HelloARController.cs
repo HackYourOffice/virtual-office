@@ -43,7 +43,9 @@ namespace GoogleARCore.HelloAR
         /// <summary>
         /// A model to place when a raycast from a user touch hits a plane.
         /// </summary>
-        public GameObject m_andyAndroidPrefab;
+        public GameObject m_pointPrefab;
+
+        public GameObject m_linesPrefab;
 
         /// <summary>
         /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
@@ -53,6 +55,9 @@ namespace GoogleARCore.HelloAR
         private List<TrackedPlane> m_newPlanes = new List<TrackedPlane>();
 
         private List<TrackedPlane> m_allPlanes = new List<TrackedPlane>();
+
+        private GameObject lines = null;
+        private int numberOfPoints = 0;
 
         private Color[] m_planeColors = new Color[] {
             new Color(1.0f, 1.0f, 1.0f),
@@ -137,17 +142,31 @@ namespace GoogleARCore.HelloAR
 
                 // Intanstiate an Andy Android object as a child of the anchor; it's transform will now benefit
                 // from the anchor's tracking.
-                var andyObject = Instantiate(m_andyAndroidPrefab, hit.Point, Quaternion.identity,
+                var newPoint = Instantiate(m_pointPrefab, hit.Point, Quaternion.identity,
                     anchor.transform);
 
                 // Andy should look at the camera but still be flush with the plane.
-                andyObject.transform.LookAt(m_firstPersonCamera.transform);
-                andyObject.transform.rotation = Quaternion.Euler(0.0f,
-                    andyObject.transform.rotation.eulerAngles.y, andyObject.transform.rotation.z);
+                newPoint.transform.LookAt(m_firstPersonCamera.transform);
+                newPoint.transform.rotation = Quaternion.Euler(0.0f,
+                    newPoint.transform.rotation.eulerAngles.y, newPoint.transform.rotation.z);
 
                 // Use a plane attachment component to maintain Andy's y-offset from the plane
                 // (occurs after anchor updates).
-                andyObject.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+                newPoint.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+
+                if (lines == null)
+                {
+                    var anchor2 = Session.CreateAnchor(hit.Point, Quaternion.identity);
+                    lines = Instantiate(m_linesPrefab, hit.Point, Quaternion.identity, anchor2.transform);
+                   lines.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+                   Debug.Log("Creating lines");
+                }
+
+                var lineRenderer = lines.GetComponent<LineRenderer>();
+                lineRenderer.positionCount = numberOfPoints + 1;
+                lineRenderer.SetPosition(numberOfPoints, new Vector3(newPoint.transform.position.x, newPoint.transform.position.y, newPoint.transform.position.z));
+                numberOfPoints++;
+                Debug.Log("Drawing new line point");
             }
         }
 
