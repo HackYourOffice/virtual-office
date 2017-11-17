@@ -24,6 +24,7 @@ namespace GoogleARCore.HelloAR
     using UnityEngine;
     using UnityEngine.Rendering;
     using GoogleARCore;
+    using UnityEngine.UI;
 
     /// <summary>
     /// Controlls the HelloAR example.
@@ -46,6 +47,7 @@ namespace GoogleARCore.HelloAR
         public GameObject m_pointPrefab;
 
         public GameObject m_linesPrefab;
+        public Text text;
 
         public GameObject m_targetPrefab;
 
@@ -60,6 +62,9 @@ namespace GoogleARCore.HelloAR
 
         private GameObject lines = null;
         private int numberOfPoints = 0;
+
+        private DataController dataController;
+        private GameData gameData;
 
         private Color[] m_planeColors = new Color[] {
             new Color(1.0f, 1.0f, 1.0f),
@@ -79,12 +84,23 @@ namespace GoogleARCore.HelloAR
             new Color(1.0f, 0.756f, 0.027f)
         };
 
+        public void Start()
+        {
+            dataController = FindObjectOfType<DataController>();
+
+            dataController.LoadPoiData();
+            gameData = dataController.GetGameData();
+            Debug.Log("GameData test: " + gameData.test);
+        }
+
         /// <summary>
         /// The Unity Update() method.
         /// </summary>
-        public void Update ()
+        public void Update()
         {
             _QuitOnConnectionErrors();
+
+            text.text = gameData.test;
 
             // The tracking state must be FrameTrackingState.Tracking in order to access the Frame.
             if (Frame.TrackingState != FrameTrackingState.Tracking)
