@@ -36,10 +36,12 @@ public class DataController : MonoBehaviour
 
 public class GameData
 {
-    public string test;
+    public string name;
+    public string myFavourite;
 
-    public GameData(string test)
+    public GameData(string name, string myFavourite)
     {
-        this.test = test;
+        this.name = name;
+        this.myFavourite = myFavourite;
     }
 }

@@ -41,15 +41,11 @@ namespace GoogleARCore.HelloAR
         /// </summary>
         public GameObject m_trackedPlanePrefab;
 
-        /// <summary>
-        /// A model to place when a raycast from a user touch hits a plane.
-        /// </summary>
-        public GameObject m_pointPrefab;
-
         public GameObject m_linesPrefab;
         public Text text;
 
         public GameObject m_targetPrefab;
+        public GameObject m_signPrefab;
 
         /// <summary>
         /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
@@ -90,7 +86,7 @@ namespace GoogleARCore.HelloAR
 
             dataController.LoadPoiData();
             gameData = dataController.GetGameData();
-            Debug.Log("GameData test: " + gameData.test);
+
         }
 
         /// <summary>
@@ -100,7 +96,7 @@ namespace GoogleARCore.HelloAR
         {
             _QuitOnConnectionErrors();
 
-            text.text = gameData.test;
+            text.text = gameData.name;
 
             // The tracking state must be FrameTrackingState.Tracking in order to access the Frame.
             if (Frame.TrackingState != FrameTrackingState.Tracking)
@@ -158,42 +154,45 @@ namespace GoogleARCore.HelloAR
                 // world evolves.
                 var anchor = Session.CreateAnchor(hit.Point, Quaternion.identity);
 
-                if(Input.touchCount == 1)
+                if (Input.touchCount == 1)
                 {
-                    AddLandmark(m_pointPrefab, hit, anchor);
+                    AddLine(hit, anchor);
                 }
 
                 if (Input.touchCount == 2)
                 {
-                    AddLandmark(m_targetPrefab, hit, anchor);
+                    var target = Instantiate(m_targetPrefab, hit.Point, Quaternion.identity, anchor.transform);
+                    target.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+                    var sign = Instantiate(m_signPrefab, hit.Point, Quaternion.identity, anchor.transform);
+                    sign.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+                    TextMesh[] texts = sign.GetComponentsInChildren<TextMesh>();
+                    foreach(TextMesh text in texts)
+                    {
+                        if(text.name == "Name")
+                        {
+                            text.text = gameData.name;
+
+                        }else if (text.name == "Text")
+                        {
+                            text.text = gameData.myFavourite;
+                        }
+                        else
+                        {
+                            Debug.Log("Unknown name: " + text.name);
+                        }
+                    }
+
+                    AddLine(hit, anchor);
                 }
             }
         }
 
-    
-        private void AddLandmark(GameObject landMarkPrefab, TrackableHit hit, Anchor anchor)
-        {
-            // Intanstiate a landmark as a child of the anchor; it's transform will now benefit
-            // from the anchor's tracking.
-            var newPoint = Instantiate(landMarkPrefab, hit.Point, Quaternion.identity,
-                anchor.transform);
-
-            // the landmark should look at the camera but still be flush with the plane.
-            newPoint.transform.LookAt(m_firstPersonCamera.transform);
-            newPoint.transform.rotation = Quaternion.Euler(0.0f,
-                newPoint.transform.rotation.eulerAngles.y, newPoint.transform.rotation.z);
-
-            newPoint.GetComponent<PlaneAttachment>().Attach(hit.Plane);
-            AddLine(newPoint.transform, hit, anchor);
-        }
-
       
 
-        private void AddLine(Transform transform, TrackableHit hit, Anchor anchor)
+        private void AddLine(TrackableHit hit, Anchor anchor)
         {
             if (lines == null)
             {
-
                 lines = Instantiate(m_linesPrefab, hit.Point, Quaternion.identity, anchor.transform);
                 lines.GetComponent<PlaneAttachment>().Attach(hit.Plane);
                 Debug.Log("Creating lines");
@@ -201,7 +200,7 @@ namespace GoogleARCore.HelloAR
 
             var lineRenderer = lines.GetComponent<LineRenderer>();
             lineRenderer.positionCount = numberOfPoints + 1;
-            lineRenderer.SetPosition(numberOfPoints, new Vector3(transform.position.x, transform.position.y, transform.position.z));
+            lineRenderer.SetPosition(numberOfPoints, new Vector3(anchor.transform.position.x, anchor.transform.position.y, anchor.transform.position.z));
             numberOfPoints++;
             Debug.Log("Drawing new line point");
         }
