@@ -42,7 +42,6 @@ namespace GoogleARCore.HelloAR
         public GameObject m_trackedPlanePrefab;
 
         public GameObject m_linesPrefab;
-        public Text text;
 
         public GameObject m_targetPrefab;
         public GameObject m_signPrefab;
@@ -95,8 +94,6 @@ namespace GoogleARCore.HelloAR
         public void Update()
         {
             _QuitOnConnectionErrors();
-
-            text.text = gameData.name;
 
             // The tracking state must be FrameTrackingState.Tracking in order to access the Frame.
             if (Frame.TrackingState != FrameTrackingState.Tracking)
@@ -163,16 +160,23 @@ namespace GoogleARCore.HelloAR
                 {
                     var target = Instantiate(m_targetPrefab, hit.Point, Quaternion.identity, anchor.transform);
                     target.GetComponent<PlaneAttachment>().Attach(hit.Plane);
-                    var sign = Instantiate(m_signPrefab, hit.Point, Quaternion.identity, anchor.transform);
+                   
+                    AddLine(hit, anchor);
+                }
+
+                if (Input.touchCount == 3)
+                {
+                    var sign = Instantiate(m_signPrefab, new Vector3(hit.Point.x, hit.Point.y + 0.2f, hit.Point.z), Quaternion.identity, anchor.transform);
                     sign.GetComponent<PlaneAttachment>().Attach(hit.Plane);
                     TextMesh[] texts = sign.GetComponentsInChildren<TextMesh>();
-                    foreach(TextMesh text in texts)
+                    foreach (TextMesh text in texts)
                     {
-                        if(text.name == "Name")
+                        if (text.name == "Name")
                         {
                             text.text = gameData.name;
 
-                        }else if (text.name == "Text")
+                        }
+                        else if (text.name == "Text")
                         {
                             text.text = gameData.myFavourite;
                         }
@@ -181,8 +185,6 @@ namespace GoogleARCore.HelloAR
                             Debug.Log("Unknown name: " + text.name);
                         }
                     }
-
-                    AddLine(hit, anchor);
                 }
             }
         }
